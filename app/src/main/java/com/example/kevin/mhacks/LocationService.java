@@ -7,7 +7,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 /**
  * Created by kevin on 10/8/16.
@@ -30,7 +32,7 @@ public class LocationService implements LocationListener {
     private static boolean locationServiceAvailable;
 
     private LocationManager locationManager;
-    public Location location;
+    private Location location;
     public double longitude;
     public double latitude;
 
@@ -52,7 +54,7 @@ public class LocationService implements LocationListener {
     private LocationService( Context context )     {
 
         initLocationService(context);
-        LogService.log("LocationService created");
+        Log.i("Location", "LocationService created");
     }
 
 
@@ -111,14 +113,26 @@ public class LocationService implements LocationListener {
                 }
             }
         } catch (Exception ex)  {
-            LogService.log( "Error creating location service: " + ex.getMessage() );
-
+            Log.e("Error", "Error creating location service: " + ex.getMessage() );
         }
     }
 
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
 
     @Override
     public void onLocationChanged(Location location)     {
         // do stuff here with location object
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {}
+
+    @Override
+    public void onProviderEnabled(String provider) {}
+
+    private void updateCoordinates(){
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
     }
 }

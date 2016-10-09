@@ -24,6 +24,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.content.ContentResolver;
 import android.provider.Settings;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -32,12 +35,8 @@ public class MainActivity extends AppCompatActivity
 
     String currentLatitude;
     String currentLongitude;
-    TextView gpscoords = (TextView)findViewById(R.id.gps);
-    private final static int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-    LocationListener locationListener = new LocationService();
-
-
+    TextView gpscoords;
+    //private final static int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) throws SecurityException {
@@ -45,20 +44,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        gpscoords = (TextView)findViewById(R.id.gps);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -69,6 +55,16 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        Window window = this.getWindow();
+// clear FLAG_TRANSLUCENT_STATUS flag:
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+// finally change the color
+        window.setStatusBarColor(this.getResources().getColor(R.color.colorPrimary));
+
+        LocationService ls = LocationService.getLocationManager(getApplicationContext());
+        Log.i("longitude", Double.toString(ls.longitude));
     }
 
     @Override
@@ -81,30 +77,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                    gpscoords.setText(currentLatitude + currentLongitude);
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -154,38 +126,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    /*----Method to Check GPS is enabled or disabled ----- */
-    private Boolean displayGpsStatus() {
-        ContentResolver contentResolver = getBaseContext()
-                .getContentResolver();
-        boolean gpsStatus = Settings.Secure
-                .isLocationProviderEnabled(contentResolver,
-                        LocationManager.GPS_PROVIDER);
-        if (gpsStatus) {
-            return true;
-
-        } else {
-            return false;
-        }
-    }
-    /*---------- Listener class to get coordinates ------------- */
-    private class LocationService implements LocationListener {
-
-        @Override
-        public void onLocationChanged(Location loc) {
-            currentLongitude = "Longitude: " + loc.getLongitude();
-            currentLatitude = "Latitude: " + loc.getLatitude();
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {}
-
-        @Override
-        public void onProviderEnabled(String provider) {}
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
-    }
 
 }
 
